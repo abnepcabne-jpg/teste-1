@@ -1014,6 +1014,7 @@ document.getElementById("btnAddMov").addEventListener("click", ()=>{
     toast("Caixa fechado", "Abra o caixa para registrar movimentações.");
     return;
   }
+
   const type = document.getElementById("movType").value;
   const cat = document.getElementById("movCat").value;
   const amount = Number(document.getElementById("movAmount").value);
@@ -1028,13 +1029,46 @@ document.getElementById("btnAddMov").addEventListener("click", ()=>{
   if(!amount || amount <= 0){ toast("Erro", "Informe um valor válido."); return; }
   if(!desc){ toast("Erro", "Informe a descrição."); return; }
 
-  DB.moves.unshift({ id: uid(), type, cat, amount, date, pay, memberId, desc, note, staff });
+  // REGISTRA MOVIMENTAÇÃO
+  DB.moves.unshift({
+    id: uid(),
+    type,
+    cat,
+    amount,
+    date,
+    pay,
+    memberId,
+    desc,
+    note,
+    staff
+  });
+
+  // ✅ CORREÇÃO: RENOVAR VENCIMENTO AUTOMATICAMENTE
+  if(type === "income" && memberId && cat === "Mensalidade"){
+    const member = DB.members.find(m => m.id === memberId);
+    if(member){
+      const base = parseISO(date);
+      base.setMonth(base.getMonth() + 1);
+
+      const off = base.getTimezoneOffset();
+      const local = new Date(base.getTime() - off * 60000);
+      member.due = local.toISOString().slice(0,10);
+
+      toast(
+        "Mensalidade atualizada",
+        `Novo vencimento: ${fmtDateBR(member.due)}`
+      );
+    }
+  }
+
   save(DB);
-  toast("Salvo", "Movimentação registrada.");
+
   document.getElementById("movAmount").value = "";
   document.getElementById("movDesc").value = "";
   document.getElementById("movNote").value = "";
+
   renderAll();
+  
 });
 document.getElementById("btnClearMov").addEventListener("click", ()=>{
   document.getElementById("movAmount").value = "";
