@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Financeiro Academia • Controle de Caixa</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#0f1a2e;
+      --panel2:#0c1629;
+      --card:#0f1f3a;
+      --muted:#94a3b8;
+      --text:#e5e7eb;
+      --line:rgba(148,163,184,.18);
+      --brand:#22c55e;
+      --brand2:#3b82f6;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --shadow: 0 18px 40px rgba(0,0,0,.35);
+      --radius:16px;
+      --radius2:22px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:var(--sans);
+      background: radial-gradient(1000px 600px at 10% -10%, rgba(59,130,246,.25), transparent 55%),
+                  radial-gradient(900px 520px at 90% 0%, rgba(34,197,94,.18), transparent 50%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+    .app{display:flex; min-height:100vh}
+    .sidebar{
+      width:280px; padding:18px 16px; border-right:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(15,26,46,.85), rgba(11,18,32,.85));
+      position:sticky; top:0; height:100vh;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px; padding:10px 10px 14px;
+      border-bottom:1px solid var(--line);
+    }
+    .logo{
+      width:42px;height:42px;border-radius:14px;
+      background: linear-gradient(135deg, rgba(34,197,94,.95), rgba(59,130,246,.95));
+      display:grid; place-items:center; box-shadow: var(--shadow);
+      font-weight:800;
+    }
+    .brand h1{margin:0;font-size:14px;line-height:1.2}
+    .brand p{margin:2px 0 0; font-size:12px; color:var(--muted)}
+    .nav{margin-top:14px; display:flex; flex-direction:column; gap:6px;}
+    .nav button{
+      all:unset; cursor:pointer;
+      padding:10px 12px; border-radius:14px;
+      display:flex; align-items:center; gap:10px;
+      color:rgba(229,231,235,.9);
+      border:1px solid transparent;
+      transition:.15s;
+    }
+    .nav button:hover{background:rgba(148,163,184,.08); border-color:rgba(148,163,184,.12)}
+    .nav button.active{background:rgba(59,130,246,.14); border-color:rgba(59,130,246,.25)}
+    .badge{
+      margin-left:auto;
+      font-size:12px; color:rgba(229,231,235,.9);
+      background:rgba(239,68,68,.18);
+      border:1px solid rgba(239,68,68,.25);
+      padding:3px 8px; border-radius:999px;
+    }
+    .sidebar .foot{
+      position:absolute; bottom:16px; left:16px; right:16px;
+      padding-top:14px; border-top:1px solid var(--line);
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+    }
+    .pill{
+      font-family:var(--mono);
+      font-size:11px; color:rgba(229,231,235,.75);
+      padding:6px 10px; border-radius:999px;
+      background:rgba(148,163,184,.08); border:1px solid rgba(148,163,184,.12);
+      white-space:nowrap;
+    }
+    .btn{
+      border:none; cursor:pointer;
+      border-radius:14px; padding:10px 12px;
+      font-weight:700;
+      background:rgba(148,163,184,.10);
+      border:1px solid rgba(148,163,184,.14);
+      color:var(--text);
+      transition:.15s;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn.primary{
+      background:rgba(34,197,94,.18);
+      border-color:rgba(34,197,94,.26);
+    }
+    .btn.blue{
+      background:rgba(59,130,246,.18);
+      border-color:rgba(59,130,246,.26);
+    }
+    .btn.danger{
+      background:rgba(239,68,68,.18);
+      border-color:rgba(239,68,68,.26);
+    }
+    .btn.warn{
+      background:rgba(245,158,11,.18);
+      border-color:rgba(245,158,11,.26);
+    }
+
+    .main{flex:1; padding:18px 18px 30px;}
+    .topbar{
+      display:flex; flex-wrap:wrap; gap:10px;
+      align-items:center; justify-content:space-between;
+      margin-bottom:14px;
+    }
+    .topbar .left{display:flex; gap:10px; align-items:center}
+    .topbar h2{margin:0;font-size:16px}
+    .sub{color:var(--muted); font-size:12px}
+    .grid{
+      display:grid; gap:12px;
+      grid-template-columns: repeat(12, 1fr);
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(15,31,58,.85), rgba(12,22,41,.85));
+      border:1px solid rgba(148,163,184,.14);
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      padding:14px;
+      overflow:hidden;
+    }
+    .kpi{
+      display:flex; gap:12px; align-items:flex-start;
+    }
+    .kpi .dot{
+      width:38px;height:38px;border-radius:14px;
+      background:rgba(148,163,184,.10);
+      border:1px solid rgba(148,163,184,.14);
+      display:grid;place-items:center;
+      font-weight:900;
+    }
+    .kpi h3{margin:0;font-size:12px;color:rgba(229,231,235,.85)}
+    .kpi .val{margin-top:6px; font-size:18px; font-weight:900; letter-spacing:.2px}
+    .kpi .mini{margin-top:4px; color:var(--muted); font-size:12px}
+    .kpi.good .dot{background:rgba(34,197,94,.16); border-color:rgba(34,197,94,.25)}
+    .kpi.good .val{color:#b7f7c9}
+    .kpi.blue .dot{background:rgba(59,130,246,.16); border-color:rgba(59,130,246,.25)}
+    .kpi.blue .val{color:#bfdbfe}
+    .kpi.warn .dot{background:rgba(245,158,11,.16); border-color:rgba(245,158,11,.25)}
+    .kpi.warn .val{color:#fde68a}
+    .kpi.bad .dot{background:rgba(239,68,68,.16); border-color:rgba(239,68,68,.25)}
+    .kpi.bad .val{color:#fecaca}
+
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .field{
+      display:flex; flex-direction:column; gap:6px; flex:1;
+      min-width:180px;
+    }
+    label{font-size:12px; color:rgba(229,231,235,.8)}
+    input, select, textarea{
+      width:100%;
+      background:rgba(2,6,23,.55);
+      border:1px solid rgba(148,163,184,.18);
+      color:var(--text);
+      border-radius:14px;
+      padding:10px 11px;
+      outline:none;
+    }
+    textarea{min-height:82px; resize:vertical}
+    input:focus, select:focus, textarea:focus{border-color:rgba(59,130,246,.45)}
+    .muted{color:var(--muted); font-size:12px}
+    .hr{height:1px; background:var(--line); margin:12px 0}
+    .table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 14px;
+      border:1px solid rgba(148,163,184,.14);
+      background:rgba(2,6,23,.35);
+    }
+    .table th,.table td{
+      padding:10px 10px;
+      border-bottom:1px solid rgba(148,163,184,.10);
+      font-size:13px;
+      text-align:left;
+      vertical-align:top;
+    }
+    .table th{color:rgba(229,231,235,.86); font-size:12px; letter-spacing:.2px; background:rgba(148,163,184,.06)}
+    .table tr:last-child td{border-bottom:none}
+    .tag{
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:12px; padding:4px 8px; border-radius:999px;
+      border:1px solid rgba(148,163,184,.16);
+      background:rgba(148,163,184,.08);
+      color:rgba(229,231,235,.9);
+      white-space:nowrap;
+    }
+    .tag.good{border-color:rgba(34,197,94,.25); background:rgba(34,197,94,.12)}
+    .tag.bad{border-color:rgba(239,68,68,.25); background:rgba(239,68,68,.12)}
+    .tag.warn{border-color:rgba(245,158,11,.25); background:rgba(245,158,11,.12)}
+    .right{text-align:right}
+    .mono{font-family:var(--mono)}
+    .split{
+      display:grid; gap:12px;
+      grid-template-columns: 1.2fr .8fr;
+    }
+    @media (max-width: 1060px){
+      .sidebar{display:none}
+      .split{grid-template-columns:1fr}
+    }
+    .hide{display:none !important}
+
+    /* Login */
+    .loginWrap{
+      min-height:100vh;
+      display:grid; place-items:center;
+      padding:20px;
+    }
+    .loginCard{
+      width:min(430px, 100%);
+      background: linear-gradient(180deg, rgba(15,31,58,.90), rgba(12,22,41,.92));
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:24px;
+      box-shadow: var(--shadow);
+      padding:16px;
+    }
+    .loginHead{
+      display:flex; align-items:center; gap:12px; padding:10px 6px 14px;
+      border-bottom:1px solid var(--line);
+      margin-bottom:12px;
+    }
+    .loginHead h2{margin:0;font-size:16px}
+    .small{font-size:12px;color:var(--muted); margin:4px 0 0}
+    .toast{
+      position:fixed; right:16px; bottom:16px;
+      background:rgba(2,6,23,.85);
+      border:1px solid rgba(148,163,184,.18);
+      border-radius:16px;
+      padding:10px 12px;
+      box-shadow:var(--shadow);
+      display:none;
+      max-width:min(420px, calc(100vw - 32px));
+    }
+    .toast b{display:block; font-size:13px}
+    .toast span{display:block; margin-top:2px; color:var(--muted); font-size:12px}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<section id="loginView" class="loginWrap">
+  <div class="loginCard">
+    <div class="loginHead">
+      <div class="logo">CA</div>
+      <div>
+        <h2>Financeiro Academia</h2>
+        <div class="small">MODELO 3 • Caixa + Relatórios + Alunos</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Usuário</label>
+        <input id="loginUser" placeholder="admin" autocomplete="username"/>
+      </div>
+      <div class="field">
+        <label>Senha</label>
+        <input id="loginPass" type="password" placeholder="admin123" autocomplete="current-password"/>
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn blue" id="btnLogin" style="flex:1">Entrar</button>
+      <button class="btn" id="btnResetDemo">Restaurar Demo</button>
+    </div>
+    <p class="muted" style="margin:12px 4px 0">
+      Padrão: <span class="mono">admin</span> / <span class="mono">admin123</span> • Dados ficam salvos no navegador.
+    </p>
+  </div>
+</section>
+
+<!-- APP -->
+<section id="appView" class="app hide">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">CA</div>
+      <div>
+        <h1>Controle de Caixa • Academia</h1>
+        <p id="gymNameSide">Financeiro Completo</p>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button data-tab="dashboard" class="active">📊 Dashboard</button>
+      <button data-tab="mov">💼 Movimentações</button>
+      <button data-tab="members">👥 Alunos <span id="lateBadge" class="badge hide">0 atrasados</span></button>
+      <button data-tab="reports">🧾 Relatórios</button>
+      <button data-tab="settings">⚙️ Configurações</button>
+    </div>
+
+    <div class="foot">
+      <span class="pill" id="cashStatusPill">Caixa: —</span>
+      <button class="btn danger" id="btnLogout">Sair</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="left">
+        <h2 id="pageTitle">Dashboard</h2>
+        <span class="pill" id="todayPill">—</span>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="btnOpenCash">Abrir Caixa</button>
+        <button class="btn warn" id="btnCloseCash">Fechar Caixa</button>
+        <button class="btn blue" id="btnExportCSV">Exportar CSV</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <section id="tab-dashboard">
+      <div class="grid">
+        <div class="card" style="grid-column:span 3">
+          <div class="kpi blue">
+            <div class="dot">R$</div>
+            <div>
+              <h3>Entradas (período)</h3>
+              <div class="val" id="kpiIn">R$ 0,00</div>
+              <div class="mini" id="kpiInMini">—</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="grid-column:span 3">
+          <div class="kpi bad">
+            <div class="dot">↘</div>
+            <div>
+              <h3>Saídas (período)</h3>
+              <div class="val" id="kpiOut">R$ 0,00</div>
+              <div class="mini" id="kpiOutMini">—</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="grid-column:span 3">
+          <div class="kpi good">
+            <div class="dot">Σ</div>
+            <div>
+              <h3>Saldo (período)</h3>
+              <div class="val" id="kpiBal">R$ 0,00</div>
+              <div class="mini" id="kpiBalMini">—</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="grid-column:span 3">
+          <div class="kpi warn">
+            <div class="dot">⏰</div>
+            <div>
+              <h3>Alunos em atraso</h3>
+              <div class="val" id="kpiLate">0</div>
+              <div class="mini">vencimento antes de hoje</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column:span 8">
+          <div class="row" style="justify-content:space-between; align-items:flex-end">
+            <div>
+              <div style="font-weight:900">Resumo Financeiro</div>
+              <div class="muted">Filtro rápido para KPI e relatórios</div>
+            </div>
+            <div class="row">
+              <div class="field" style="min-width:160px">
+                <label>Período</label>
+                <select id="dashRange">
+                  <option value="today">Hoje</option>
+                  <option value="7">Últimos 7 dias</option>
+                  <option value="30" selected>Últimos 30 dias</option>
+                  <option value="month">Este mês</option>
+                  <option value="all">Tudo</option>
+                </select>
+              </div>
+              <div class="field" style="min-width:160px">
+                <label>Tipo</label>
+                <select id="dashType">
+                  <option value="all" selected>Entradas + Saídas</option>
+                  <option value="income">Somente Entradas</option>
+                  <option value="expense">Somente Saídas</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="hr"></div>
+
+          <div class="split">
+            <div>
+              <div class="muted">Top categorias (período)</div>
+              <table class="table" style="margin-top:10px">
+                <thead>
+                  <tr>
+                    <th>Categoria</th>
+                    <th>Tipo</th>
+                    <th class="right">Total</th>
+                  </tr>
+                </thead>
+                <tbody id="topCatsBody"></tbody>
+              </table>
+            </div>
+            <div>
+              <div class="muted">Métodos (período)</div>
+              <table class="table" style="margin-top:10px">
+                <thead>
+                  <tr>
+                    <th>Método</th>
+                    <th class="right">Total</th>
+                  </tr>
+                </thead>
+                <tbody id="payMethodsBody"></tbody>
+              </table>
+
+              <div class="hr"></div>
+              <div class="muted">Status do caixa</div>
+              <div style="margin-top:8px" class="row">
+                <span class="tag" id="cashTag">—</span>
+                <span class="pill mono" id="cashOpenedAt">—</span>
+              </div>
+              <div class="muted" style="margin-top:10px" id="cashHint">
+                Abra o caixa para registrar movimentações do dia.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column:span 4">
+          <div style="font-weight:900">Últimas movimentações</div>
+          <div class="muted">Entradas e saídas recentes</div>
+          <div class="hr"></div>
+          <div style="max-height:360px; overflow:auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Descrição</th>
+                  <th class="right">Valor</th>
+                </tr>
+              </thead>
+              <tbody id="lastMovesBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MOVIMENTAÇÕES -->
+    <section id="tab-mov" class="hide">
+      <div class="grid">
+        <div class="card" style="grid-column:span 12">
+          <div class="row" style="justify-content:space-between; align-items:flex-end">
+            <div>
+              <div style="font-weight:900">Registrar movimentação</div>
+              <div class="muted">Entradas (mensalidade, diária, produto) e saídas (despesas)</div>
+            </div>
+            <span class="tag" id="cashTag2">—</span>
+          </div>
+          <div class="hr"></div>
+
+          <div class="row">
+            <div class="field">
+              <label>Tipo</label>
+              <select id="movType">
+                <option value="income" selected>Entrada</option>
+                <option value="expense">Saída</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Categoria</label>
+              <select id="movCat">
+                <option>Mensalidade</option>
+                <option>Diária</option>
+                <option>Produto</option>
+                <option>Personal</option>
+                <option>Outros</option>
+                <option>Aluguel</option>
+                <option>Água/Luz</option>
+                <option>Manutenção</option>
+                <option>Fornecedor</option>
+                <option>Internet</option>
+                <option>Salários</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Valor (R$)</label>
+              <input id="movAmount" type="number" step="0.01" placeholder="Ex: 120.00"/>
+            </div>
+
+            <div class="field">
+              <label>Data</label>
+              <input id="movDate" type="date"/>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <div class="field">
+              <label>Método de pagamento</label>
+              <select id="movPay">
+                <option>Dinheiro</option>
+                <option>PIX</option>
+                <option>Cartão Débito</option>
+                <option>Cartão Crédito</option>
+                <option>Transferência</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Aluno (opcional)</label>
+              <select id="movMember">
+                <option value="">—</option>
+              </select>
+            </div>
+
+            <div class="field" style="min-width:280px">
+              <label>Descrição</label>
+              <input id="movDesc" placeholder="Ex: Mensalidade Janeiro / Compra de material"/>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <div class="field" style="min-width:280px">
+              <label>Observação (opcional)</label>
+              <input id="movNote" placeholder="Ex: Recebido por João / Nota fiscal 123"/>
+            </div>
+            <div class="field">
+              <label>Funcionário</label>
+              <input id="movStaff" placeholder="Ex: atendente 1"/>
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-end">
+              <button class="btn blue" id="btnAddMov">Salvar</button>
+              <button class="btn danger" id="btnClearMov">Limpar</button>
+            </div>
+          </div>
+
+          <div class="muted" style="margin-top:10px" id="cashLockMsg"></div>
+        </div>
+
+        <div class="card" style="grid-column:span 12">
+          <div class="row" style="justify-content:space-between; align-items:flex-end">
+            <div>
+              <div style="font-weight:900">Movimentações</div>
+              <div class="muted">Filtre por período, tipo, aluno e texto</div>
+            </div>
+            <div class="row">
+              <div class="field" style="min-width:150px">
+                <label>De</label>
+                <input id="fFrom" type="date"/>
+              </div>
+              <div class="field" style="min-width:150px">
+                <label>Até</label>
+                <input id="fTo" type="date"/>
+              </div>
+              <div class="field" style="min-width:170px">
+                <label>Tipo</label>
+                <select id="fType">
+                  <option value="all">Todos</option>
+                  <option value="income">Entradas</option>
+                  <option value="expense">Saídas</option>
+                </select>
+              </div>
+              <div class="field" style="min-width:200px">
+                <label>Aluno</label>
+                <select id="fMember"><option value="">Todos</option></select>
+              </div>
+              <div class="field" style="min-width:240px">
+                <label>Buscar</label>
+                <input id="fSearch" placeholder="descrição, categoria, funcionário..."/>
+              </div>
+              <button class="btn" id="btnApplyFilter" style="align-self:flex-end">Aplicar</button>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div style="overflow:auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Tipo</th>
+                  <th>Categoria</th>
+                  <th>Descrição</th>
+                  <th>Aluno</th>
+                  <th>Método</th>
+                  <th>Funcionário</th>
+                  <th class="right">Valor</th>
+                  <th class="right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="movTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="row" style="justify-content:space-between; margin-top:10px">
+            <div class="muted" id="movCount">—</div>
+            <div class="row">
+              <span class="tag good" id="movSumIn">Entradas: R$ 0,00</span>
+              <span class="tag bad" id="movSumOut">Saídas: R$ 0,00</span>
+              <span class="tag" id="movSumBal">Saldo: R$ 0,00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ALUNOS -->
+    <section id="tab-members" class="hide">
+      <div class="grid">
+        <div class="card" style="grid-column:span 12">
+          <div class="row" style="justify-content:space-between; align-items:flex-end">
+            <div>
+              <div style="font-weight:900">Cadastro de alunos</div>
+              <div class="muted">Controle de vencimento + atrasos + histórico individual</div>
+            </div>
+            <button class="btn blue" id="btnAddMember">Adicionar aluno</button>
+          </div>
+          <div class="hr"></div>
+
+          <div class="row">
+            <div class="field" style="min-width:260px">
+              <label>Buscar aluno</label>
+              <input id="mSearch" placeholder="nome, telefone, plano..."/>
+            </div>
+            <div class="field" style="min-width:200px">
+              <label>Status</label>
+              <select id="mStatus">
+                <option value="all">Todos</option>
+                <option value="ok">Em dia</option>
+                <option value="late">Atrasados</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div style="overflow:auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Aluno</th>
+                  <th>Plano</th>
+                  <th>Vencimento</th>
+                  <th>Status</th>
+                  <th>Contato</th>
+                  <th class="right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="membersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column:span 12">
+          <div class="row" style="justify-content:space-between; align-items:flex-end">
+            <div>
+              <div style="font-weight:900">Histórico individual</div>
+              <div class="muted">Selecione um aluno para ver entradas relacionadas</div>
+            </div>
+            <div class="row">
+              <div class="field" style="min-width:260px">
+                <label>Aluno</label>
+                <select id="histMember"><option value="">—</option></select>
+              </div>
+              <button class="btn" id="btnHistLoad" style="align-self:flex-end">Carregar</button>
+            </div>
+          </div>
+          <div class="hr"></div>
+
+          <div style="overflow:auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Categoria</th>
+                  <th>Descrição</th>
+                  <th>Método</th>
+                  <th class="right">Valor</th>
+                </tr>
+              </thead>
+              <tbody id="histBody"></tbody>
+            </table>
+          </div>
+          <div class="row" style="justify-content:space-between; margin-top:10px">
+            <div class="muted" id="histCount">—</div>
+            <span class="tag good" id="histSum">Total: R$ 0,00</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RELATÓRIOS -->
+    <section id="tab-reports" class="hide">
+      <div class="grid">
+        <div class="card" style="grid-column:span 12">
+          <div style="font-weight:900">Relatórios</div>
+          <div class="muted">Gere um resumo por período e exporte CSV (ou imprima pelo navegador)</div>
+          <div class="hr"></div>
+
+          <div class="row">
+            <div class="field" style="min-width:160px">
+              <label>De</label>
+              <input id="rFrom" type="date"/>
+            </div>
+            <div class="field" style="min-width:160px">
+              <label>Até</label>
+              <input id="rTo" type="date"/>
+            </div>
+            <div class="field" style="min-width:190px">
+              <label>Agrupar por</label>
+              <select id="rGroup">
+                <option value="day">Dia</option>
+                <option value="cat" selected>Categoria</option>
+                <option value="pay">Método</option>
+                <option value="staff">Funcionário</option>
+              </select>
+            </div>
+            <div class="field" style="min-width:190px">
+              <label>Tipo</label>
+              <select id="rType">
+                <option value="all" selected>Entradas + Saídas</option>
+                <option value="income">Entradas</option>
+                <option value="expense">Saídas</option>
+              </select>
+            </div>
+            <button class="btn blue" id="btnBuildReport" style="align-self:flex-end">Gerar</button>
+            <button class="btn" id="btnPrint" style="align-self:flex-end">Imprimir</button>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="row" style="justify-content:space-between">
+            <div class="row">
+              <span class="tag good" id="rSumIn">Entradas: R$ 0,00</span>
+              <span class="tag bad" id="rSumOut">Saídas: R$ 0,00</span>
+              <span class="tag" id="rSumBal">Saldo: R$ 0,00</span>
+            </div>
+            <div class="muted" id="rCount">—</div>
+          </div>
+
+          <div style="overflow:auto; margin-top:10px">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Grupo</th>
+                  <th>Tipo</th>
+                  <th class="right">Total</th>
+                  <th class="right">Qtde</th>
+                </tr>
+              </thead>
+              <tbody id="reportBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONFIG -->
+    <section id="tab-settings" class="hide">
+      <div class="grid">
+        <div class="card" style="grid-column:span 12">
+          <div style="font-weight:900">Configurações</div>
+          <div class="muted">Personalize e gerencie seus dados</div>
+          <div class="hr"></div>
+
+          <div class="row">
+            <div class="field" style="min-width:240px">
+              <label>Nome da academia</label>
+              <input id="setGymName" placeholder="Ex: Academia Alpha"/>
+            </div>
+            <div class="field" style="min-width:200px">
+              <label>Usuário admin</label>
+              <input id="setAdminUser" placeholder="admin"/>
+            </div>
+            <div class="field" style="min-width:200px">
+              <label>Senha admin</label>
+              <input id="setAdminPass" type="password" placeholder="admin123"/>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <button class="btn blue" id="btnSaveSettings">Salvar</button>
+            <button class="btn danger" id="btnWipeAll">Apagar TODOS os dados</button>
+          </div>
+
+          <div class="hr"></div>
+          <div class="muted">
+            Dica: para gerar PDF, use o botão <b>Imprimir</b> no relatório e selecione “Salvar como PDF”.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =============================
+   STORAGE + HELPERS
+============================= */
+const KEY = "caixa_academia_modelo3_v1";
+
+function moneyBR(v){
+  const n = Number(v || 0);
+  return n.toLocaleString("pt-BR", {style:"currency", currency:"BRL"});
+}
+function isoToday(){
+  const d = new Date();
+  const off = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - off*60000);
+  return local.toISOString().slice(0,10);
+}
+function parseISO(s){
+  // safe date parse for yyyy-mm-dd
+  if(!s) return null;
+  const [y,m,d] = s.split("-").map(Number);
+  return new Date(y, m-1, d);
+}
+function fmtDateBR(iso){
+  if(!iso) return "—";
+  const d = parseISO(iso);
+  return d ? d.toLocaleDateString("pt-BR") : iso;
+}
+function uid(){
+  return Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
+function toast(title, msg){
+  const t = document.getElementById("toast");
+  t.innerHTML = `<b>${title}</b><span>${msg || ""}</span>`;
+  t.style.display = "block";
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=> t.style.display="none", 2800);
+}
+function load(){
+  const raw = localStorage.getItem(KEY);
+  if(!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+function save(data){
+  localStorage.setItem(KEY, JSON.stringify(data));
+}
+function defaultData(){
+  // Demo com alguns alunos e movimentações
+  const today = isoToday();
+  const d = {
+    settings: { gymName:"Financeiro Completo", adminUser:"admin", adminPass:"admin123" },
+    session: { logged:false },
+    cash: { isOpen:false, openedAt:null, closedAt:null, openedBy:null, closedBy:null },
+    members: [
+      { id: uid(), name:"Maria Silva", phone:"(79) 99999-1111", plan:"Mensal", due: today, notes:"" },
+      { id: uid(), name:"João Santos", phone:"(79) 99999-2222", plan:"Mensal", due: shiftISO(today, -5), notes:"Atrasado" },
+      { id: uid(), name:"Ana Pereira", phone:"(79) 99999-3333", plan:"Trimestral", due: shiftISO(today, 10), notes:"" },
+    ],
+    moves: [
+      { id: uid(), type:"income", cat:"Mensalidade", amount:120, date: today, pay:"PIX", memberId:null, desc:"Entrada demo", note:"", staff:"Sistema" },
+      { id: uid(), type:"expense", cat:"Água/Luz", amount:85.50, date: today, pay:"Dinheiro", memberId:null, desc:"Conta de energia", note:"", staff:"Sistema" },
+    ]
+  };
+  return d;
+}
+function ensureData(){
+  let d = load();
+  if(!d){
+    d = defaultData();
+    save(d);
+  }
+  return d;
+}
+function shiftISO(iso, days){
+  const dt = parseISO(iso);
+  dt.setDate(dt.getDate() + days);
+  const off = dt.getTimezoneOffset();
+  const local = new Date(dt.getTime() - off*60000);
+  return local.toISOString().slice(0,10);
+}
+function inRange(iso, fromISO, toISO){
+  if(!iso) return false;
+  const x = parseISO(iso).getTime();
+  if(fromISO){
+    const a = parseISO(fromISO).getTime();
+    if(x < a) return false;
+  }
+  if(toISO){
+    const b = parseISO(toISO).getTime();
+    // include end day
+    const end = b + 24*60*60*1000 - 1;
+    if(x > end) return false;
+  }
+  return true;
+}
+
+/* =============================
+   STATE
+============================= */
+let DB = ensureData();
+
+function loginOk(u,p){
+  return u === DB.settings.adminUser && p === DB.settings.adminPass;
+}
+
+/* =============================
+   UI ELEMENTS
+============================= */
+const loginView = document.getElementById("loginView");
+const appView = document.getElementById("appView");
+
+const todayPill = document.getElementById("todayPill");
+todayPill.textContent = `Hoje: ${fmtDateBR(isoToday())}`;
+
+document.getElementById("movDate").value = isoToday();
+document.getElementById("fFrom").value = shiftISO(isoToday(), -30);
+document.getElementById("fTo").value = isoToday();
+document.getElementById("rFrom").value = shiftISO(isoToday(), -30);
+document.getElementById("rTo").value = isoToday();
+
+/* =============================
+   NAV TABS
+============================= */
+const tabs = ["dashboard","mov","members","reports","settings"];
+document.querySelectorAll(".nav button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const tab = btn.dataset.tab;
+    setTab(tab);
+  });
+});
+function setTab(tab){
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active", b.dataset.tab===tab));
+  tabs.forEach(t=>{
+    document.getElementById("tab-"+t).classList.toggle("hide", t!==tab);
+  });
+  const titles = {
+    dashboard:"Dashboard",
+    mov:"Movimentações",
+    members:"Alunos",
+    reports:"Relatórios",
+    settings:"Configurações",
+  };
+  document.getElementById("pageTitle").textContent = titles[tab] || "—";
+  renderAll();
+}
+
+/* =============================
+   AUTH
+============================= */
+function renderAuth(){
+  const logged = !!DB.session.logged;
+  loginView.classList.toggle("hide", logged);
+  appView.classList.toggle("hide", !logged);
+  if(logged) renderAll();
+}
+document.getElementById("btnLogin").addEventListener("click", ()=>{
+  const u = document.getElementById("loginUser").value.trim();
+  const p = document.getElementById("loginPass").value;
+  if(loginOk(u,p)){
+    DB.session.logged = true;
+    save(DB);
+    toast("Bem-vindo!", "Login realizado com sucesso.");
+    renderAuth();
+  }else{
+    toast("Login inválido", "Confira usuário e senha.");
+  }
+});
+document.getElementById("btnLogout").addEventListener("click", ()=>{
+  DB.session.logged = false;
+  save(DB);
+  toast("Saiu", "Sessão encerrada.");
+  renderAuth();
+});
+document.getElementById("btnResetDemo").addEventListener("click", ()=>{
+  DB = defaultData();
+  save(DB);
+  toast("Demo restaurada", "Dados de exemplo carregados.");
+});
+
+/* =============================
+   CASH OPEN/CLOSE
+============================= */
+document.getElementById("btnOpenCash").addEventListener("click", ()=>{
+  if(DB.cash.isOpen){ toast("Caixa já está aberto", ""); return; }
+  const staff = prompt("Quem está abrindo o caixa? (nome do funcionário)") || "—";
+  DB.cash.isOpen = true;
+  DB.cash.openedAt = new Date().toISOString();
+  DB.cash.openedBy = staff;
+  DB.cash.closedAt = null;
+  DB.cash.closedBy = null;
+  save(DB);
+  toast("Caixa aberto", `Responsável: ${staff}`);
+  renderAll();
+});
+document.getElementById("btnCloseCash").addEventListener("click", ()=>{
+  if(!DB.cash.isOpen){ toast("Caixa já está fechado", ""); return; }
+  const staff = prompt("Quem está fechando o caixa? (nome do funcionário)") || "—";
+  DB.cash.isOpen = false;
+  DB.cash.closedAt = new Date().toISOString();
+  DB.cash.closedBy = staff;
+  save(DB);
+  toast("Caixa fechado", `Responsável: ${staff}`);
+  renderAll();
+});
+function cashStatusText(){
+  return DB.cash.isOpen ? "ABERTO" : "FECHADO";
+}
+
+/* =============================
+   MOVIMENTAÇÕES (CRUD)
+============================= */
+document.getElementById("btnAddMov").addEventListener("click", ()=>{
+  if(!DB.cash.isOpen){
+    toast("Caixa fechado", "Abra o caixa para registrar movimentações.");
+    return;
+  }
+  const type = document.getElementById("movType").value;
+  const cat = document.getElementById("movCat").value;
+  const amount = Number(document.getElementById("movAmount").value);
+  const date = document.getElementById("movDate").value;
+  const pay = document.getElementById("movPay").value;
+  const memberId = document.getElementById("movMember").value || null;
+  const desc = document.getElementById("movDesc").value.trim();
+  const note = document.getElementById("movNote").value.trim();
+  const staff = document.getElementById("movStaff").value.trim() || "—";
+
+  if(!date){ toast("Erro", "Selecione a data."); return; }
+  if(!amount || amount <= 0){ toast("Erro", "Informe um valor válido."); return; }
+  if(!desc){ toast("Erro", "Informe a descrição."); return; }
+
+  DB.moves.unshift({ id: uid(), type, cat, amount, date, pay, memberId, desc, note, staff });
+  save(DB);
+  toast("Salvo", "Movimentação registrada.");
+  document.getElementById("movAmount").value = "";
+  document.getElementById("movDesc").value = "";
+  document.getElementById("movNote").value = "";
+  renderAll();
+});
+document.getElementById("btnClearMov").addEventListener("click", ()=>{
+  document.getElementById("movAmount").value = "";
+  document.getElementById("movDesc").value = "";
+  document.getElementById("movNote").value = "";
+  document.getElementById("movStaff").value = "";
+  toast("Limpo", "Campos resetados.");
+});
+function deleteMove(id){
+  if(!confirm("Excluir esta movimentação?")) return;
+  DB.moves = DB.moves.filter(m=>m.id!==id);
+  save(DB);
+  toast("Excluído", "Movimentação removida.");
+  renderAll();
+}
+
+/* =============================
+   MEMBERS (CRUD)
+============================= */
+document.getElementById("btnAddMember").addEventListener("click", ()=>{
+  const name = prompt("Nome do aluno:")?.trim();
+  if(!name) return;
+  const phone = prompt("Telefone/WhatsApp (opcional):")?.trim() || "";
+  const plan = prompt("Plano (ex: Mensal, Trimestral):")?.trim() || "Mensal";
+  const due = prompt("Vencimento (AAAA-MM-DD):", isoToday())?.trim() || isoToday();
+  DB.members.unshift({ id: uid(), name, phone, plan, due, notes:"" });
+  save(DB);
+  toast("Aluno adicionado", name);
+  renderAll();
+});
+function editMember(id){
+  const m = DB.members.find(x=>x.id===id);
+  if(!m) return;
+  const name = prompt("Nome:", m.name)?.trim();
+  if(!name) return;
+  const phone = prompt("Telefone/WhatsApp:", m.phone || "")?.trim() || "";
+  const plan = prompt("Plano:", m.plan || "Mensal")?.trim() || "Mensal";
+  const due = prompt("Vencimento (AAAA-MM-DD):", m.due || isoToday())?.trim() || m.due;
+  const notes = prompt("Observações:", m.notes || "") ?? m.notes;
+  m.name = name; m.phone = phone; m.plan = plan; m.due = due; m.notes = notes;
+  save(DB);
+  toast("Aluno atualizado", name);
+  renderAll();
+}
+function deleteMember(id){
+  const m = DB.members.find(x=>x.id===id);
+  if(!m) return;
+  if(!confirm(`Excluir aluno "${m.name}"?`)) return;
+  DB.members = DB.members.filter(x=>x.id!==id);
+  // mantém as movimentações (histórico) sem aluno vinculado
+  DB.moves = DB.moves.map(x=> x.memberId===id ? ({...x, memberId:null}) : x );
+  save(DB);
+  toast("Aluno excluído", m.name);
+  renderAll();
+}
+
+/* =============================
+   EXPORT CSV (ALL MOVES)
+============================= */
+document.getElementById("btnExportCSV").addEventListener("click", ()=>{
+  const rows = [
+    ["data","tipo","categoria","descricao","aluno","metodo","funcionario","valor","observacao"],
+    ...DB.moves.map(m=>{
+      const mem = DB.members.find(x=>x.id===m.memberId);
+      return [
+        m.date,
+        m.type==="income"?"entrada":"saida",
+        m.cat,
+        (m.desc||"").replaceAll('"','""'),
+        mem?mem.name:"",
+        m.pay,
+        m.staff,
+        String(m.amount).replace(".",","),
+        (m.note||"").replaceAll('"','""'),
+      ];
+    })
+  ];
+  const csv = rows.map(r => r.map(x => `"${String(x)}"`).join(";")).join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `movimentacoes_${isoToday()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast("Exportado", "CSV baixado com sucesso.");
+});
+
+/* =============================
+   FILTERS + REPORTS
+============================= */
+document.getElementById("btnApplyFilter").addEventListener("click", renderMovesTable);
+document.getElementById("btnBuildReport").addEventListener("click", renderReport);
+document.getElementById("btnPrint").addEventListener("click", ()=> window.print());
+
+/* =============================
+   SETTINGS
+============================= */
+document.getElementById("btnSaveSettings").addEventListener("click", ()=>{
+  const gymName = document.getElementById("setGymName").value.trim() || "Financeiro Completo";
+  const adminUser = document.getElementById("setAdminUser").value.trim() || "admin";
+  const adminPass = document.getElementById("setAdminPass").value || "admin123";
+  DB.settings.gymName = gymName;
+  DB.settings.adminUser = adminUser;
+  DB.settings.adminPass = adminPass;
+  save(DB);
+  toast("Salvo", "Configurações atualizadas.");
+  renderAll();
+});
+document.getElementById("btnWipeAll").addEventListener("click", ()=>{
+  if(!confirm("Tem certeza? Isso apaga TODOS os dados.")) return;
+  localStorage.removeItem(KEY);
+  DB = defaultData();
+  DB.session.logged = false;
+  save(DB);
+  toast("Apagado", "Dados removidos e demo restaurada.");
+  renderAuth();
+});
+
+/* =============================
+   RENDER
+============================= */
+function renderAll(){
+  // header
+  document.getElementById("gymNameSide").textContent = DB.settings.gymName || "Financeiro Completo";
+  document.getElementById("setGymName").value = DB.settings.gymName || "";
+  document.getElementById("setAdminUser").value = DB.settings.adminUser || "admin";
+  document.getElementById("setAdminPass").value = DB.settings.adminPass || "admin123";
+
+  // cash status
+  const status = cashStatusText();
+  document.getElementById("cashStatusPill").textContent = `Caixa: ${status}`;
+  const tag = document.getElementById("cashTag");
+  const tag2 = document.getElementById("cashTag2");
+  const openedAt = DB.cash.openedAt ? new Date(DB.cash.openedAt).toLocaleString("pt-BR") : "—";
+  document.getElementById("cashOpenedAt").textContent = DB.cash.openedAt ? `Aberto: ${openedAt}` : "—";
+  const tText = DB.cash.isOpen ? `🟢 Caixa ABERTO (${DB.cash.openedBy||"—"})` : `🔴 Caixa FECHADO`;
+  tag.textContent = tText;
+  tag2.textContent = tText;
+  tag.className = "tag " + (DB.cash.isOpen ? "good" : "bad");
+  tag2.className = tag.className;
+
+  document.getElementById("btnOpenCash").disabled = DB.cash.isOpen;
+  document.getElementById("btnCloseCash").disabled = !DB.cash.isOpen;
+
+  const lockMsg = document.getElementById("cashLockMsg");
+  lockMsg.textContent = DB.cash.isOpen ? "" : "⚠️ Caixa fechado: abra o caixa para registrar movimentações.";
+  document.getElementById("cashHint").textContent = DB.cash.isOpen
+    ? "Caixa aberto: registre entradas e saídas do dia."
+    : "Abra o caixa para registrar movimentações do dia.";
+
+  // set default dates
+  const movDate = document.getElementById("movDate");
+  if(!movDate.value) movDate.value = isoToday();
+
+  // populate member selects
+  fillMemberSelects();
+
+  // late badge
+  const late = getLateMembers();
+  const badge = document.getElementById("lateBadge");
+  if(late.length>0){
+    badge.classList.remove("hide");
+    badge.textContent = `${late.length} atrasados`;
+  }else{
+    badge.classList.add("hide");
+  }
+
+  renderDashboard();
+  renderMovesTable();
+  renderMembers();
+  renderHistory(); // keeps selected member
+  // reports only when tab open or after click; but safe to keep totals updated by last config
+}
+
+function fillMemberSelects(){
+  const list = DB.members.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  const movMember = document.getElementById("movMember");
+  const fMember = document.getElementById("fMember");
+  const histMember = document.getElementById("histMember");
+
+  const selectedMov = movMember.value;
+  const selectedFilter = fMember.value;
+  const selectedHist = histMember.value;
+
+  const opt = (value, label) => {
+    const o = document.createElement("option");
+    o.value = value; o.textContent = label;
+    return o;
+  };
+
+  movMember.innerHTML = "";
+  movMember.appendChild(opt("", "—"));
+  fMember.innerHTML = "";
+  fMember.appendChild(opt("", "Todos"));
+  histMember.innerHTML = "";
+  histMember.appendChild(opt("", "—"));
+
+  list.forEach(m=>{
+    movMember.appendChild(opt(m.id, m.name));
+    fMember.appendChild(opt(m.id, m.name));
+    histMember.appendChild(opt(m.id, m.name));
+  });
+
+  movMember.value = selectedMov;
+  fMember.value = selectedFilter;
+  histMember.value = selectedHist;
+}
+
+function getLateMembers(){
+  const today = parseISO(isoToday()).getTime();
+  return DB.members.filter(m=>{
+    const due = parseISO(m.due);
+    if(!due) return false;
+    return due.getTime() < today;
+  });
+}
+
+function getDashRangeDates(){
+  const mode = document.getElementById("dashRange").value;
+  const today = isoToday();
+  if(mode==="today") return {from: today, to: today};
+  if(mode==="7") return {from: shiftISO(today, -6), to: today};
+  if(mode==="30") return {from: shiftISO(today, -29), to: today};
+  if(mode==="month"){
+    const d = parseISO(today);
+    const first = new Date(d.getFullYear(), d.getMonth(), 1);
+    const off = first.getTimezoneOffset();
+    const local = new Date(first.getTime() - off*60000);
+    return {from: local.toISOString().slice(0,10), to: today};
+  }
+  return {from: null, to: null}; // all
+}
+
+document.getElementById("dashRange").addEventListener("change", renderDashboard);
+document.getElementById("dashType").addEventListener("change", renderDashboard);
+
+function renderDashboard(){
+  const {from,to} = getDashRangeDates();
+  const typeFilter = document.getElementById("dashType").value;
+
+  const moves = DB.moves.filter(m=>{
+    if(!inRange(m.date, from, to)) return false;
+    if(typeFilter!=="all" && m.type!==typeFilter) return false;
+    return true;
+  });
+
+  const sumIn = moves.filter(m=>m.type==="income").reduce((a,b)=>a+b.amount,0);
+  const sumOut = moves.filter(m=>m.type==="expense").reduce((a,b)=>a+b.amount,0);
+  const bal = sumIn - sumOut;
+
+  document.getElementById("kpiIn").textContent = moneyBR(sumIn);
+  document.getElementById("kpiOut").textContent = moneyBR(sumOut);
+  document.getElementById("kpiBal").textContent = moneyBR(bal);
+
+  const periodLabel = from && to ? `${fmtDateBR(from)} → ${fmtDateBR(to)}` : "Tudo";
+  document.getElementById("kpiInMini").textContent = periodLabel;
+  document.getElementById("kpiOutMini").textContent = periodLabel;
+  document.getElementById("kpiBalMini").textContent = periodLabel;
+
+  const late = getLateMembers();
+  document.getElementById("kpiLate").textContent = late.length;
+
+  // Top categories
+  const catMap = new Map();
+  moves.forEach(m=>{
+    const key = `${m.cat}__${m.type}`;
+    catMap.set(key, (catMap.get(key)||0) + m.amount);
+  });
+  const catRows = [...catMap.entries()]
+    .map(([k,v])=>{
+      const [cat, type] = k.split("__");
+      return {cat, type, total:v};
+    })
+    .sort((a,b)=>b.total-a.total)
+    .slice(0,8);
+
+  const topCatsBody = document.getElementById("topCatsBody");
+  topCatsBody.innerHTML = "";
+  if(catRows.length===0){
+    topCatsBody.innerHTML = `<tr><td colspan="3" class="muted">Sem dados no período.</td></tr>`;
+  }else{
+    catRows.forEach(r=>{
+      const typeTag = r.type==="income"
+        ? `<span class="tag good">Entrada</span>`
+        : `<span class="tag bad">Saída</span>`;
+      topCatsBody.insertAdjacentHTML("beforeend", `
+        <tr>
+          <td>${r.cat}</td>
+          <td>${typeTag}</td>
+          <td class="right mono">${moneyBR(r.total)}</td>
+        </tr>
+      `);
+    });
+  }
+
+  // Pay methods
+  const payMap = new Map();
+  moves.forEach(m=>{
+    payMap.set(m.pay, (payMap.get(m.pay)||0) + m.amount);
+  });
+  const payRows = [...payMap.entries()].map(([pay,total])=>({pay,total}))
+    .sort((a,b)=>b.total-a.total)
+    .slice(0,8);
+
+  const payBody = document.getElementById("payMethodsBody");
+  payBody.innerHTML = "";
+  if(payRows.length===0){
+    payBody.innerHTML = `<tr><td colspan="2" class="muted">Sem dados no período.</td></tr>`;
+  }else{
+    payRows.forEach(r=>{
+      payBody.insertAdjacentHTML("beforeend", `
+        <tr>
+          <td>${r.pay}</td>
+          <td class="right mono">${moneyBR(r.total)}</td>
+        </tr>
+      `);
+    });
+  }
+
+  // last moves
+  const lastMovesBody = document.getElementById("lastMovesBody");
+  lastMovesBody.innerHTML = "";
+  DB.moves.slice(0,8).forEach(m=>{
+    const sign = m.type==="income" ? "+" : "−";
+    const cls = m.type==="income" ? "good" : "bad";
+    lastMovesBody.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td class="mono">${fmtDateBR(m.date)}</td>
+        <td>
+          <div style="font-weight:800">${m.desc}</div>
+          <div class="muted">${m.cat} • ${m.pay}</div>
+        </td>
+        <td class="right mono"><span class="tag ${cls}">${sign} ${moneyBR(m.amount)}</span></td>
+      </tr>
+    `);
+  });
+  if(DB.moves.length===0){
+    lastMovesBody.innerHTML = `<tr><td colspan="3" class="muted">Sem movimentações.</td></tr>`;
+  }
+
+  // cash open info
+  document.getElementById("cashOpenedAt").textContent = DB.cash.openedAt
+    ? `Aberto: ${new Date(DB.cash.openedAt).toLocaleString("pt-BR")}`
+    : "—";
+}
+
+function renderMovesTable(){
+  const from = document.getElementById("fFrom").value || null;
+  const to = document.getElementById("fTo").value || null;
+  const type = document.getElementById("fType").value;
+  const member = document.getElementById("fMember").value || "";
+  const q = (document.getElementById("fSearch").value || "").trim().toLowerCase();
+
+  const rows = DB.moves.filter(m=>{
+    if(!inRange(m.date, from, to)) return false;
+    if(type!=="all" && m.type!==type) return false;
+    if(member && m.memberId!==member) return false;
+    if(q){
+      const mem = DB.members.find(x=>x.id===m.memberId);
+      const hay = [
+        m.cat, m.desc, m.note, m.staff, m.pay,
+        mem?mem.name:""
+      ].join(" ").toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const body = document.getElementById("movTableBody");
+  body.innerHTML = "";
+  let sumIn=0, sumOut=0;
+
+  rows.forEach(m=>{
+    const mem = DB.members.find(x=>x.id===m.memberId);
+    const t = m.type==="income" ? `<span class="tag good">Entrada</span>` : `<span class="tag bad">Saída</span>`;
+    const valTag = m.type==="income"
+      ? `<span class="tag good mono">+ ${moneyBR(m.amount)}</span>`
+      : `<span class="tag bad mono">− ${moneyBR(m.amount)}</span>`;
+
+    if(m.type==="income") sumIn += m.amount;
+    else sumOut += m.amount;
+
+    body.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td class="mono">${fmtDateBR(m.date)}</td>
+        <td>${t}</td>
+        <td>${m.cat}</td>
+        <td>
+          <div style="font-weight:800">${m.desc}</div>
+          ${m.note ? `<div class="muted">${m.note}</div>` : `<div class="muted">—</div>`}
+        </td>
+        <td>${mem ? mem.name : "—"}</td>
+        <td>${m.pay}</td>
+        <td>${m.staff || "—"}</td>
+        <td class="right">${valTag}</td>
+        <td class="right">
+          <button class="btn danger" onclick="deleteMove('${m.id}')">Excluir</button>
+        </td>
+      </tr>
+    `);
+  });
+
+  if(rows.length===0){
+    body.innerHTML = `<tr><td colspan="9" class="muted">Nenhuma movimentação encontrada.</td></tr>`;
+  }
+
+  document.getElementById("movCount").textContent = `${rows.length} registro(s) no filtro`;
+  document.getElementById("movSumIn").textContent = `Entradas: ${moneyBR(sumIn)}`;
+  document.getElementById("movSumOut").textContent = `Saídas: ${moneyBR(sumOut)}`;
+  document.getElementById("movSumBal").textContent = `Saldo: ${moneyBR(sumIn - sumOut)}`;
+}
+
+function renderMembers(){
+  const q = (document.getElementById("mSearch").value || "").trim().toLowerCase();
+  const status = document.getElementById("mStatus").value;
+
+  const today = parseISO(isoToday()).getTime();
+  const list = DB.members
+    .filter(m=>{
+      const isLate = parseISO(m.due)?.getTime() < today;
+      if(status==="ok" && isLate) return false;
+      if(status==="late" && !isLate) return false;
+
+      if(q){
+        const hay = [m.name,m.phone,m.plan,m.due,m.notes].join(" ").toLowerCase();
+        if(!hay.includes(q)) return false;
+      }
+      return true;
+    })
+    .sort((a,b)=>a.name.localeCompare(b.name));
+
+  const body = document.getElementById("membersBody");
+  body.innerHTML = "";
+
+  list.forEach(m=>{
+    const isLate = parseISO(m.due)?.getTime() < today;
+    const st = isLate ? `<span class="tag bad">Atrasado</span>` : `<span class="tag good">Em dia</span>`;
+    body.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td>
+          <div style="font-weight:900">${m.name}</div>
+          ${m.notes ? `<div class="muted">${m.notes}</div>` : `<div class="muted">—</div>`}
+        </td>
+        <td>${m.plan || "—"}</td>
+        <td class="mono">${fmtDateBR(m.due)}</td>
+        <td>${st}</td>
+        <td>${m.phone || "—"}</td>
+        <td class="right">
+          <button class="btn" onclick="editMember('${m.id}')">Editar</button>
+          <button class="btn danger" onclick="deleteMember('${m.id}')">Excluir</button>
+        </td>
+      </tr>
+    `);
+  });
+
+  if(list.length===0){
+    body.innerHTML = `<tr><td colspan="6" class="muted">Nenhum aluno encontrado.</td></tr>`;
+  }
+}
+document.getElementById("mSearch").addEventListener("input", renderMembers);
+document.getElementById("mStatus").addEventListener("change", renderMembers);
+
+function renderHistory(){
+  // keeps current selection; only loads on button
+  // but also refresh list
+  const selected = document.getElementById("histMember").value;
+  if(selected) {
+    // keep current displayed; user clicks load to refresh
+  }
+}
+document.getElementById("btnHistLoad").addEventListener("click", ()=>{
+  const id = document.getElementById("histMember").value;
+  const body = document.getElementById("histBody");
+  body.innerHTML = "";
+  if(!id){
+    body.innerHTML = `<tr><td colspan="5" class="muted">Selecione um aluno.</td></tr>`;
+    document.getElementById("histCount").textContent = "—";
+    document.getElementById("histSum").textContent = `Total: ${moneyBR(0)}`;
+    return;
+  }
+  const rows = DB.moves.filter(m=>m.type==="income" && m.memberId===id)
+    .slice()
+    .sort((a,b)=> parseISO(b.date)-parseISO(a.date));
+
+  let sum = 0;
+  rows.forEach(m=>{
+    sum += m.amount;
+    body.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td class="mono">${fmtDateBR(m.date)}</td>
+        <td>${m.cat}</td>
+        <td>${m.desc}</td>
+        <td>${m.pay}</td>
+        <td class="right"><span class="tag good mono">+ ${moneyBR(m.amount)}</span></td>
+      </tr>
+    `);
+  });
+
+  if(rows.length===0){
+    body.innerHTML = `<tr><td colspan="5" class="muted">Sem entradas vinculadas a este aluno.</td></tr>`;
+  }
+  document.getElementById("histCount").textContent = `${rows.length} entrada(s)`;
+  document.getElementById("histSum").textContent = `Total: ${moneyBR(sum)}`;
+});
+
+function renderReport(){
+  const from = document.getElementById("rFrom").value || null;
+  const to = document.getElementById("rTo").value || null;
+  const group = document.getElementById("rGroup").value;
+  const type = document.getElementById("rType").value;
+
+  const moves = DB.moves.filter(m=>{
+    if(!inRange(m.date, from, to)) return false;
+    if(type!=="all" && m.type!==type) return false;
+    return true;
+  });
+
+  const sumIn = moves.filter(m=>m.type==="income").reduce((a,b)=>a+b.amount,0);
+  const sumOut = moves.filter(m=>m.type==="expense").reduce((a,b)=>a+b.amount,0);
+
+  document.getElementById("rSumIn").textContent = `Entradas: ${moneyBR(sumIn)}`;
+  document.getElementById("rSumOut").textContent = `Saídas: ${moneyBR(sumOut)}`;
+  document.getElementById("rSumBal").textContent = `Saldo: ${moneyBR(sumIn - sumOut)}`;
+  document.getElementById("rCount").textContent = `${moves.length} movimentação(ões) no período`;
+
+  const keyOf = (m)=>{
+    if(group==="day") return m.date;
+    if(group==="cat") return m.cat;
+    if(group==="pay") return m.pay;
+    if(group==="staff") return m.staff || "—";
+    return "—";
+  };
+
+  const map = new Map();
+  moves.forEach(m=>{
+    const k = `${keyOf(m)}__${m.type}`;
+    const cur = map.get(k) || {group:keyOf(m), type:m.type, total:0, count:0};
+    cur.total += m.amount;
+    cur.count += 1;
+    map.set(k, cur);
+  });
+
+  const rows = [...map.values()].sort((a,b)=>b.total-a.total);
+
+  const body = document.getElementById("reportBody");
+  body.innerHTML = "";
+  if(rows.length===0){
+    body.innerHTML = `<tr><td colspan="4" class="muted">Sem dados para o período.</td></tr>`;
+    return;
+  }
+
+  rows.forEach(r=>{
+    const t = r.type==="income" ? `<span class="tag good">Entrada</span>` : `<span class="tag bad">Saída</span>`;
+    body.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td class="mono">${group==="day" ? fmtDateBR(r.group) : r.group}</td>
+        <td>${t}</td>
+        <td class="right mono">${moneyBR(r.total)}</td>
+        <td class="right mono">${r.count}</td>
+      </tr>
+    `);
+  });
+}
+
+/* =============================
+   HOOK UP MEMBER SELECTS CHANGES
+============================= */
+document.getElementById("mSearch").addEventListener("input", renderMembers);
+
+/* =============================
+   INIT
+============================= */
+(function init(){
+  // set login placeholders
+  document.getElementById("loginUser").value = DB.settings.adminUser || "admin";
+  document.getElementById("loginPass").value = DB.settings.adminPass || "admin123";
+
+  renderAuth();
+  setTab("dashboard");
+})();
+</script>
+</body>
+</html>
